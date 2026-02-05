@@ -132,3 +132,12 @@ export class ProviderError extends Error {
     this.name = "ProviderError";
   }
 }
+
+export class ValidationError extends Error {
+  constructor(
+    public readonly issues: Array<{ message: string; path: (string | number)[] }>,
+  ) {
+    super(`Validation failed: ${issues.map((i) => i.message).join(", ")}`);
+    this.name = "ValidationError";
+  }
+}
