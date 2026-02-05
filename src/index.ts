@@ -1,7 +1,7 @@
 export { Chatbot } from "./chatbot";
 export { createApi } from "./api";
 export type { Api, HealthCheckResponse } from "./api";
-export { ClaudeProvider, GptProvider, GeminiProvider } from "./providers";
+export { ClaudeProvider, GptProvider, GeminiProvider, DEFAULT_PROVIDERS } from "./providers";
 export {
   type ChatRequest,
   type ChatResponse,

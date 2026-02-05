@@ -19,7 +19,8 @@ export interface Api {
  *   for content violations, or `ProviderError` for model failures.
  * - `healthCheck` returns a simple status object.
  */
-export function createApi(chatbot: Chatbot): Api {
+export function createApi(chatbot?: Chatbot): Api {
+  const bot = chatbot ?? new Chatbot();
   return {
     async chat(request: ChatRequest): Promise<ChatResponse> {
       const parsed = chatRequestSchema.safeParse(request);
@@ -33,7 +34,7 @@ export function createApi(chatbot: Chatbot): Api {
         );
       }
 
-      return chatbot.chat(parsed.data);
+      return bot.chat(parsed.data);
     },
 
     healthCheck(): HealthCheckResponse {

@@ -1,5 +1,6 @@
 import { v4 as uuid } from "uuid";
 import { SafetyChecker } from "./safety";
+import { DEFAULT_PROVIDERS } from "./providers";
 import {
   ChatRequest,
   ChatResponse,
@@ -28,8 +29,9 @@ export class Chatbot {
   private readonly providers: Map<ModelId, ModelProvider>;
   private readonly safetyChecker: SafetyChecker;
 
-  constructor(providers: ModelProvider[]) {
-    this.providers = new Map(providers.map((p) => [p.id, p]));
+  constructor(providers?: ModelProvider[]) {
+    const providerList = providers ?? DEFAULT_PROVIDERS;
+    this.providers = new Map(providerList.map((p) => [p.id, p]));
     this.safetyChecker = new SafetyChecker(this.providers);
   }
 
