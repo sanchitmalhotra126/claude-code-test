@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { DEFAULT_SAFETY_CONFIG } from "../types";
+import { DEFAULT_SAFETY_CONFIG, DEFAULT_LLM_SAFETY_PROMPT } from "../types";
 
 export const safetyConfigRouter = Router();
 
@@ -13,6 +13,10 @@ export const safetyConfigRouter = Router();
 safetyConfigRouter.get("/", (_req: Request, res: Response) => {
   res.json({
     defaults: DEFAULT_SAFETY_CONFIG,
+    llmSafetyDefaults: {
+      defaultPrompt: DEFAULT_LLM_SAFETY_PROMPT,
+      defaultModel: DEFAULT_SAFETY_CONFIG.llmSafety.model,
+    },
     notes: {
       overridePolicy:
         "Callers may tighten constraints (e.g. lower maxInputLength, add blockedTopics) " +
@@ -21,6 +25,10 @@ safetyConfigRouter.get("/", (_req: Request, res: Response) => {
         "Custom blockedTopics are unioned with defaults — you can add topics but not remove them.",
       systemPromptPrefixMerge:
         "Custom systemPromptPrefix is appended to the default, not replacing it.",
+      llmSafetyOverrides:
+        "Callers can change the safety evaluation model and provide a custom prompt. " +
+        "Custom prompts must include {{CONTENT}} and {{BLOCKED_TOPICS}} placeholders. " +
+        "The LLM safety layer cannot be disabled if the platform default has it enabled.",
     },
   });
 });

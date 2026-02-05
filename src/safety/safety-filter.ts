@@ -4,9 +4,28 @@ import {
   BlockedTopic,
   ContentPart,
   ChatMessage,
+  LLMSafetyConfig,
   DEFAULT_SAFETY_CONFIG,
+  DEFAULT_LLM_SAFETY_MODEL,
 } from "../types";
 import { TOPIC_PATTERNS } from "./keyword-lists";
+
+/**
+ * Loose override shape accepted from API consumers.
+ * All fields are optional — `mergeSafetyConfig` fills in defaults.
+ */
+export interface SafetyConfigOverrides {
+  level?: SafetyConfig["level"];
+  blockedTopics?: SafetyConfig["blockedTopics"];
+  maxInputLength?: number;
+  maxOutputTokens?: number;
+  allowImageInput?: boolean;
+  allowFileUpload?: boolean;
+  allowedFileMimeTypes?: string[];
+  maxFileSizeBytes?: number;
+  systemPromptPrefix?: string;
+  llmSafety?: Partial<LLMSafetyConfig>;
+}
 
 /**
  * Merges a caller-provided partial safety config with the platform defaults.
@@ -16,7 +35,7 @@ import { TOPIC_PATTERNS } from "./keyword-lists";
  * raise it above the default.
  */
 export function mergeSafetyConfig(
-  overrides?: Partial<SafetyConfig>
+  overrides?: SafetyConfigOverrides
 ): SafetyConfig {
   if (!overrides) return { ...DEFAULT_SAFETY_CONFIG };
 
@@ -57,6 +76,18 @@ export function mergeSafetyConfig(
       overrides.systemPromptPrefix
         ? `${defaults.systemPromptPrefix} ${overrides.systemPromptPrefix}`
         : defaults.systemPromptPrefix,
+
+    llmSafety: overrides.llmSafety
+      ? {
+          // Cannot disable LLM safety if platform default has it enabled
+          enabled:
+            defaults.llmSafety.enabled && overrides.llmSafety.enabled === false
+              ? true
+              : overrides.llmSafety.enabled ?? defaults.llmSafety.enabled,
+          model: overrides.llmSafety.model ?? defaults.llmSafety.model,
+          customPrompt: overrides.llmSafety.customPrompt,
+        }
+      : { ...defaults.llmSafety },
   };
 }
 
@@ -74,7 +105,7 @@ function intersectArrays(base: string[], requested: string[]): string[] {
 /**
  * Extract all text from a message's content parts for scanning.
  */
-function extractText(parts: ContentPart[]): string {
+export function extractText(parts: ContentPart[]): string {
   return parts
     .filter((p): p is Extract<ContentPart, { type: "text" }> => p.type === "text")
     .map((p) => p.text)
@@ -102,10 +133,11 @@ function scanText(
       safe: false,
       flaggedTopics: flagged,
       reason: `Content flagged for: ${flagged.join(", ")}`,
+      source: "keyword",
     };
   }
 
-  return { safe: true, flaggedTopics: [] };
+  return { safe: true, flaggedTopics: [], source: "keyword" };
 }
 
 /**

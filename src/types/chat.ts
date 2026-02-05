@@ -1,5 +1,5 @@
 import { ContentPart } from "./content";
-import { SafetyConfig } from "./safety";
+import { SafetyConfig, LLMSafetyConfig } from "./safety";
 
 /** Supported model providers. */
 export type ModelProvider = "claude" | "gpt" | "gemini";
@@ -52,6 +52,10 @@ export interface ChatResponse {
     inputCheckPassed: boolean;
     outputCheckPassed: boolean;
     flaggedTopics: string[];
+    /** Which safety layers ran. */
+    layersRun: ("keyword" | "llm")[];
+    /** Which layer caught the issue, if any. */
+    flaggedBy?: "keyword" | "llm";
   };
 }
 

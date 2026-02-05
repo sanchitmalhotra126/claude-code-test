@@ -37,6 +37,19 @@ const ModelSpecSchema = z.object({
   ]),
 });
 
+const LLMSafetyModelSpecSchema = z.object({
+  provider: z.enum(["gpt", "claude", "gemini"]),
+  modelId: z.string().min(1),
+});
+
+const LLMSafetyConfigSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    model: LLMSafetyModelSpecSchema.optional(),
+    customPrompt: z.string().min(10).optional(),
+  })
+  .optional();
+
 const SafetyConfigOverrideSchema = z
   .object({
     level: z.enum(["strict", "moderate"]).optional(),
@@ -62,6 +75,7 @@ const SafetyConfigOverrideSchema = z
     allowedFileMimeTypes: z.array(z.string()).optional(),
     maxFileSizeBytes: z.number().int().positive().optional(),
     systemPromptPrefix: z.string().optional(),
+    llmSafety: LLMSafetyConfigSchema,
   })
   .optional();
 
