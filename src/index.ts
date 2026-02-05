@@ -1,27 +1,21 @@
-import express from "express";
-import { Chatbot } from "./chatbot";
-import { createRouter } from "./api";
-import { ClaudeProvider, GptProvider, GeminiProvider } from "./providers";
-
-const app = express();
-
-app.use(express.json({ limit: "10mb" }));
-
-const providers = [
-  new ClaudeProvider(),
-  new GptProvider(),
-  new GeminiProvider(),
-];
-
-const chatbot = new Chatbot(providers);
-const router = createRouter(chatbot);
-
-app.use("/api", router);
-
-const port = process.env.PORT ?? 3000;
-
-app.listen(port, () => {
-  console.log(`Chatbot API listening on port ${port}`);
-});
-
-export { app, Chatbot };
+export { Chatbot } from "./chatbot";
+export { createApi } from "./api";
+export type { Api, HealthCheckResponse } from "./api";
+export { ClaudeProvider, GptProvider, GeminiProvider } from "./providers";
+export {
+  type ChatRequest,
+  type ChatResponse,
+  type Message,
+  type ContentBlock,
+  type TextContent,
+  type ImageContent,
+  type FileContent,
+  type ModelId,
+  type ModelProvider,
+  type SafetyResult,
+  type SafetyConfig,
+  MODEL_IDS,
+  SafetyViolationError,
+  ProviderError,
+  ValidationError,
+} from "./types";
